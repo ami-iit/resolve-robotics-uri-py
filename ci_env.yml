@@ -8,5 +8,5 @@ dependencies:
   - pip
   # packages that ship URDFs used to test
   - icub-models
-  - ergocub-sofware
+  - ergocub-software
   - ros-humble-moveit-resources-panda-description

@@ -1,7 +1,12 @@
 name: testenv
 channels:
   - conda-forge
+  - robotology
+  - robostack-staging
 dependencies:
   - python
   - pip
-  - pytest
+  # packages that ship URDFs used to test
+  - icub-models
+  - ergocub-sofware
+  - ros-humble-moveit-resources-panda-description

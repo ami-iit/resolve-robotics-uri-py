@@ -36,8 +36,16 @@ jobs:
 
     - name: Import the package
       shell: bash -l {0}
-      run: python -c "import cmake_package_check"
+      run: python -c "import resolve_robotics_uri_py"
 
-    - name: Run the Python tests
+    # This test requires the conda-forge::icub-models,
+    # robotology::ergocub-software and
+    # robostack-staging::ros-humble-moveit-resources-panda-description
+    # conda packages, that are installed in ci_env.yml environment
+    - name: Check command line helper
       shell: bash -l {0}
-      run: pytest
+      run: |
+        resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf
+        resolve-robotics-uri-py package://ergoCub/robots/ergoCubSN000/model.urdf
+        resolve-robotics-uri-py package://moveit_resources_panda_description/urdf/panda.urdf
+        ! resolve-robotics-uri-py package://this/file/does/not/exist

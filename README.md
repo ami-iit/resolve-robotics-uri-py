@@ -41,7 +41,6 @@ absolute_path = resolve_robotics_uri_py.resolve_robotics_uri("package://moveit_r
 resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf
 ~~~
 
-
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first

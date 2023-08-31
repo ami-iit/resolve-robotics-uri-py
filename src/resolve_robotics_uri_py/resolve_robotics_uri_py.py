@@ -5,7 +5,19 @@ from typing import List
 def resolve_robotics_uri(uri: str) -> pathlib.Path
 
 
-    # 
+    for folder in get_model_path_from_envs(self.env_list):
+                if check_if_model_exist(folder, model_name):
+                    folder_model_path = folder / Path(model_name)
+                    model_filenames = [
+                        folder_model_path / Path(f)
+                        for f in os.listdir(folder_model_path.absolute())
+                        if re.search("[a-zA-Z0-9_]*\.urdf", f)
+                    ]
+
+                    if model_filenames:
+                        model_found_in_env_folders = True
+                        self.custom_model_path = str(model_filenames[0])
+                        break
     return pathlib.Path("...")
 
 

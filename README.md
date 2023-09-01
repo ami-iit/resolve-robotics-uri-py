@@ -41,6 +41,11 @@ absolute_path = resolve_robotics_uri_py.resolve_robotics_uri("package://moveit_r
 resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf
 ~~~
 
+For example,  on bash this can be used to easily convert the a urdf specified via `package://` to an sdf (assuming you have Gazebo installed), using the [backtick operator](https://www.redhat.com/sysadmin/backtick-operator-vs-parens):
+~~~
+gz sdf -p `resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf`
+~~~
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first

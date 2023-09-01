@@ -37,6 +37,10 @@ jobs:
     - name: Import the package
       shell: bash -l {0}
       run: python -c "import resolve_robotics_uri_py"
+    
+    - name: Run the Python tests
+      shell: bash -l {0}
+      run: pytest
 
     # This test requires the conda-forge::icub-models,
     # robotology::ergocub-software and

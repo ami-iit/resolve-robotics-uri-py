@@ -1,4 +1,5 @@
 import resolve_robotics_uri_py
+import pytest
 
 def test_non_existing_file():
     with pytest.raises(MemoryError):

@@ -4,6 +4,8 @@ Pure Python package (that only depends on Python stdlib) to resolve a package://
 
 ## Installation
 
+Install using onle one of the following commands to install in an existing environment:
+
 ### Installation from conda-forge
 
 ```bash

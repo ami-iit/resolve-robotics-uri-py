@@ -4,7 +4,13 @@ Pure Python package (that only depends on Python stdlib) to resolve a package://
 
 ## Installation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install resolve-robotics-uri-py.
+### Installation from conda-forge
+
+```bash
+mamba install -c conda-forge resolve-robotics-uri-py
+```
+
+### Installation from PyPI
 
 ```bash
 python -m pip install resolve-robotics-uri-py

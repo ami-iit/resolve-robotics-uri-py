@@ -7,7 +7,7 @@ Pure Python package (that only depends on Python stdlib) to resolve a package://
 Use the package manager [pip](https://pip.pypa.io/en/stable/) to install resolve-robotics-uri-py.
 
 ```bash
-python -m pip install git+https://github.com/ami-iit/resolve-robotics-uri-py
+python -m pip install resolve-robotics-uri-py
 ```
 
 ## Usage in Python

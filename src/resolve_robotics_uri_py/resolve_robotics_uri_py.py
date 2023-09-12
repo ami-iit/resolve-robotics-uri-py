@@ -11,8 +11,12 @@ def get_search_paths_from_envs(env_list):
         pathlib.Path(f) if (env != "AMENT_PREFIX_PATH") else pathlib.Path(f) / "share"
         for env in env_list if os.getenv(env) is not None
         for f in os.getenv(env).split(os.pathsep)
-    ]
-
+    ] or (
+        [pathlib.Path(os.getenv("CONDA_PREFIX")) / "share"]
+        if os.getenv("CONDA_PREFIX")
+        else []
+    )
+    
 def pathlist_list_to_string(path_list):
     return ' '.join(str(path) for path in path_list)
 

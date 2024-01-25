@@ -47,17 +47,13 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
         raise FileNotFoundError(f"Passed URI \"{uri}\" use non-supported scheme {parsed_uri.scheme}")
 
     model_filenames = []
+    uri_path = uri.replace(f"{parsed_uri.scheme}://","")
 
-    if parsed_uri.scheme == "file":
-        model_filenames.append(uri.replace("file:/", ""))
-
-    if parsed_uri.scheme == "package" or parsed_uri.scheme == "model":
-        uri_path = uri.replace(f"{parsed_uri.scheme}://","")
-        for folder in get_search_paths_from_envs(env_list):
-            candidate_file_name = folder / pathlib.Path(uri_path)
-            if (candidate_file_name.is_file()):
-                if candidate_file_name not in model_filenames:
-                    model_filenames.append(candidate_file_name)
+    for folder in set(get_search_paths_from_envs(env_list)):
+        candidate_file_name = folder / pathlib.Path(uri_path)
+        if candidate_file_name.is_file():
+            if candidate_file_name not in model_filenames:
+                model_filenames.append(candidate_file_name)
 
     if model_filenames:
         if (len(model_filenames) > 1):

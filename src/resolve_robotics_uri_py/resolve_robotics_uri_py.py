@@ -61,22 +61,25 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * package://: ROS-style package URI
     #
     if parsed_uri.scheme not in SupportedSchemes:
-        raise FileNotFoundError(
-            f'Passed URI "{uri}" use non-supported scheme {parsed_uri.scheme}'
-        )
-
-    if parsed_uri.scheme == "file":
-        # Strip the URI scheme, keep the absolute path to the file (with trailing /)
-        uri_path = pathlib.Path(uri.replace(f"{parsed_uri.scheme}:/", ""))
-
-        if not uri_path.is_file():
-            msg = "resolve-robotics-uri-py: No file corresponding to uri '{}' found"
-            raise FileNotFoundError(msg.format(uri))
-
-        return uri_path
+        msg = "resolve-robotics-uri-py: Passed URI '{}' use non-supported scheme '{}'"
+        raise FileNotFoundError(msg.format(uri, parsed_uri.scheme))
 
     # Strip the URI scheme
     uri_path = uri.replace(f"{parsed_uri.scheme}://", "")
+
+    if parsed_uri.scheme == "file":
+        # Ensure the URI path is absolute
+        uri_path = uri_path if uri_path.startswith("/") else f"/{uri_path}"
+
+        # Create the file path
+        uri_file_path = pathlib.Path(uri_path)
+
+        # Check that the file exists
+        if not uri_file_path.is_file():
+            msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
+            raise FileNotFoundError(msg.format(uri))
+
+        return uri_file_path
 
     # List of matching resources found
     model_filenames = []

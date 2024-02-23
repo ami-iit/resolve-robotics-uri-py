@@ -31,9 +31,9 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * GZ_SIM_RESOURCE_PATH: Used in Gazebo Sim >= 7
     env_list = ["GAZEBO_MODEL_PATH", "ROS_PACKAGE_PATH", "AMENT_PREFIX_PATH", "SDF_PATH", "IGN_GAZEBO_RESOURCE_PATH", "GZ_SIM_RESOURCE_PATH"]
 
-    # Preliminary step: if there is no scheme, we just consider this a path and we return it as it is
+    # If the URI has no scheme, use by default the file://
     if "://" not in uri:
-        return pathlib.Path(uri)
+        uri = f"file://{uri}"
 
     # Get scheme from URI
     from urllib.parse import urlparse

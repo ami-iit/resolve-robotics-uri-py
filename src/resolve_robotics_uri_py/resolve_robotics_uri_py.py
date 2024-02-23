@@ -39,11 +39,13 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     from urllib.parse import urlparse
     parsed_uri = urlparse(uri)
 
-    # We only support at the moment:
-    # file:// scheme: to pass a file path directly
-    # package:// : ROS-style package URI
-    # model:// : SDF-style model URI
-    if parsed_uri.scheme not in ["file", "package", "model"]:
+    # We only support the following URI schemes at the moment:
+    #
+    # * file://:    to pass an absolute file path directly
+    # * model://:   SDF-style model URI
+    # * package://: ROS-style package URI
+    #
+    if parsed_uri.scheme not in {"file", "package", "model"}:
         raise FileNotFoundError(f"Passed URI \"{uri}\" use non-supported scheme {parsed_uri.scheme}")
 
     model_filenames = []

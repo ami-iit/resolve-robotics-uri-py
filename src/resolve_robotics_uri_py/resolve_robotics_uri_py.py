@@ -7,6 +7,32 @@ import warnings
 # Supported URI schemes
 SupportedSchemes = {"file", "package", "model"}
 
+# Environment variables in the search path.
+#
+# * https://github.com/robotology/idyntree/issues/291
+# * https://github.com/gazebosim/sdformat/issues/1234
+#
+# AMENT_PREFIX_PATH is the only "special" as we need to add
+# "share" after each value, see https://github.com/stack-of-tasks/pinocchio/issues/1520
+#
+# This list specify the origin of each env variable:
+#
+# * AMENT_PREFIX_PATH:        Used in ROS2
+# * GAZEBO_MODEL_PATH:        Used in Gazebo Classic
+# * GZ_SIM_RESOURCE_PATH:     Used in Gazebo Sim >= 7
+# * IGN_GAZEBO_RESOURCE_PATH: Used in Ignition Gazebo <= 7
+# * ROS_PACKAGE_PATH:         Used in ROS1
+# * SDF_PATH:                 Used in sdformat
+#
+SupportedEnvVars = {
+    "AMENT_PREFIX_PATH",
+    "GAZEBO_MODEL_PATH",
+    "GZ_SIM_RESOURCE_PATH",
+    "IGN_GAZEBO_RESOURCE_PATH",
+    "ROS_PACKAGE_PATH",
+    "SDF_PATH",
+}
+
 
 # Function inspired from https://github.com/ami-iit/robot-log-visualizer/pull/51
 def get_search_paths_from_envs(env_list):
@@ -35,27 +61,6 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     Raises:
         FileNotFoundError: If no file corresponding to the URI is found.
     """
-
-    # List of environment variables to consider, see:
-    # * https://github.com/robotology/idyntree/issues/291
-    # * https://github.com/gazebosim/sdformat/issues/1234
-    # AMENT_PREFIX_PATH is the only "special" as we need to add
-    # "share" after each value, see https://github.com/stack-of-tasks/pinocchio/issues/1520
-    # This list specify the origin of each env variable:
-    # * GAZEBO_MODEL_PATH: Used in Gazebo Classic
-    # * ROS_PACKAGE_PATH: Used in ROS1
-    # * AMENT_PREFIX_PATH: Used in ROS2
-    # * SDF_PATH: Used in sdformat
-    # * IGN_GAZEBO_RESOURCE_PATH: Used in Ignition Gazebo <= 7
-    # * GZ_SIM_RESOURCE_PATH: Used in Gazebo Sim >= 7
-    env_list = [
-        "GAZEBO_MODEL_PATH",
-        "ROS_PACKAGE_PATH",
-        "AMENT_PREFIX_PATH",
-        "SDF_PATH",
-        "IGN_GAZEBO_RESOURCE_PATH",
-        "GZ_SIM_RESOURCE_PATH",
-    ]
 
     # If the URI has no scheme, use by default the file://
     if "://" not in uri:
@@ -97,7 +102,7 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # List of matching resources found
     model_filenames = []
 
-    for folder in set(get_search_paths_from_envs(env_list)):
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars)):
 
         # Join the folder from environment variable and the URI path
         candidate_file_name = folder / uri_path

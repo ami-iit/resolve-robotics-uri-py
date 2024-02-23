@@ -4,6 +4,9 @@ import pathlib
 import sys
 import warnings
 
+# Supported URI schemes
+SupportedSchemes = {"file", "package", "model"}
+
 
 # Function inspired from https://github.com/ami-iit/robot-log-visualizer/pull/51
 def get_search_paths_from_envs(env_list):
@@ -57,7 +60,7 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * model://:   SDF-style model URI
     # * package://: ROS-style package URI
     #
-    if parsed_uri.scheme not in {"file", "package", "model"}:
+    if parsed_uri.scheme not in SupportedSchemes:
         raise FileNotFoundError(
             f'Passed URI "{uri}" use non-supported scheme {parsed_uri.scheme}'
         )
@@ -104,14 +107,21 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Utility resolve a robotics URI (file://, model://, package://) to an absolute filename."
+        description="Utility resolve a robotics URI ({}) to an absolute filename.".format(
+            ", ".join(f"{scheme}://" for scheme in SupportedSchemes)
+        )
     )
-    parser.add_argument("uri", metavar="uri", type=str, help="URI to resolve")
+    parser.add_argument("uri", metavar="URI", type=str, help="URI to resolve")
 
     args = parser.parse_args()
-    result = resolve_robotics_uri(args.uri)
 
-    print(result)
+    try:
+        result = resolve_robotics_uri(args.uri)
+    except FileNotFoundError as e:
+        print(e, file=sys.stderr)
+        sys.exit(1)
+
+    print(result, file=sys.stdout)
     sys.exit(0)
 
 

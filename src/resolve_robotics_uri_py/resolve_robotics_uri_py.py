@@ -23,6 +23,19 @@ def pathlist_list_to_string(path_list):
 
 
 def resolve_robotics_uri(uri: str) -> pathlib.Path:
+    """
+    Resolve a robotics URI to an absolute filename.
+
+    Args:
+        uri: The URI to resolve.
+
+    Returns:
+        The absolute filename corresponding to the URI.
+
+    Raises:
+        FileNotFoundError: If no file corresponding to the URI is found.
+    """
+
     # List of environment variables to consider, see:
     # * https://github.com/robotology/idyntree/issues/291
     # * https://github.com/gazebosim/sdformat/issues/1234
@@ -86,11 +99,13 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
     for folder in set(get_search_paths_from_envs(env_list)):
 
+        # Join the folder from environment variable and the URI path
         candidate_file_name = folder / uri_path
 
         if not candidate_file_name.is_file():
             continue
 
+        # Skip if the file is already in the list
         if candidate_file_name not in model_filenames:
             model_filenames.append(candidate_file_name)
 

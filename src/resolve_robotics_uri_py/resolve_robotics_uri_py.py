@@ -48,26 +48,45 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     if parsed_uri.scheme not in {"file", "package", "model"}:
         raise FileNotFoundError(f"Passed URI \"{uri}\" use non-supported scheme {parsed_uri.scheme}")
 
+    if parsed_uri.scheme == "file":
+        # Strip the URI scheme, keep the absolute path to the file (with trailing /)
+        uri_path = pathlib.Path(uri.replace(f"{parsed_uri.scheme}:/", ""))
+
+        if not uri_path.is_file():
+            msg = "resolve-robotics-uri-py: No file corresponding to uri '{}' found"
+            raise FileNotFoundError(msg.format(uri))
+
+        return uri_path
+
+    # Strip the URI scheme
+    uri_path = uri.replace(f"{parsed_uri.scheme}://", "")
+
+    # List of matching resources found
     model_filenames = []
 
-    if parsed_uri.scheme == "file":
-        model_filenames.append(uri.replace("file:/", ""))
+    for folder in set(get_search_paths_from_envs(env_list)):
 
-    if parsed_uri.scheme == "package" or parsed_uri.scheme == "model":
-        uri_path = uri.replace(f"{parsed_uri.scheme}://","")
-        for folder in get_search_paths_from_envs(env_list):
-            candidate_file_name = folder / pathlib.Path(uri_path)
-            if (candidate_file_name.is_file()):
-                if candidate_file_name not in model_filenames:
-                    model_filenames.append(candidate_file_name)
+        candidate_file_name = folder / uri_path
 
-    if model_filenames:
-        if (len(model_filenames) > 1):
-            warnings.warn(f"resolve-robotics-uri-py: Multiple files ({pathlist_list_to_string(model_filenames)}) found for uri \"{uri}\", returning the first one.")
+        if not candidate_file_name.is_file():
+            continue
+
+        if candidate_file_name not in model_filenames:
+            model_filenames.append(candidate_file_name)
+
+    if len(model_filenames) == 0:
+        msg = "resolve-robotics-uri-py: No file corresponding to uri '{}' found"
+        raise FileNotFoundError(msg.format(uri))
+
+    if len(model_filenames) > 1:
+        msg = "resolve-robotics-uri-py: "
+        msg += "Multiple files ({}) found for URI '{}', returning the first one."
+        warnings.warn(msg.format(pathlist_list_to_string(model_filenames), uri))
+
+    if len(model_filenames) >= 1:
+        assert model_filenames[0].exists()
         return pathlib.Path(model_filenames[0])
 
-    # If no file was found raise error
-    raise FileNotFoundError(f"resolve-robotics-uri-py: No file corresponding to uri \"{uri}\" found")
 
 def main():
     parser = argparse.ArgumentParser(description="Utility resolve a robotics URI (file://, model://, package://) to an absolute filename.")

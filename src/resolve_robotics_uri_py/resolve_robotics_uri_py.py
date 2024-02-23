@@ -2,19 +2,22 @@ import argparse
 import os
 import pathlib
 import sys
-from typing import List
 import warnings
+
 
 # Function inspired from https://github.com/ami-iit/robot-log-visualizer/pull/51
 def get_search_paths_from_envs(env_list):
     return [
         pathlib.Path(f) if (env != "AMENT_PREFIX_PATH") else pathlib.Path(f) / "share"
-        for env in env_list if os.getenv(env) is not None
+        for env in env_list
+        if os.getenv(env) is not None
         for f in os.getenv(env).split(os.pathsep)
     ]
 
+
 def pathlist_list_to_string(path_list):
-    return ' '.join(str(path) for path in path_list)
+    return " ".join(str(path) for path in path_list)
+
 
 def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # List of environment variables to consider, see:
@@ -29,7 +32,14 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * SDF_PATH: Used in sdformat
     # * IGN_GAZEBO_RESOURCE_PATH: Used in Ignition Gazebo <= 7
     # * GZ_SIM_RESOURCE_PATH: Used in Gazebo Sim >= 7
-    env_list = ["GAZEBO_MODEL_PATH", "ROS_PACKAGE_PATH", "AMENT_PREFIX_PATH", "SDF_PATH", "IGN_GAZEBO_RESOURCE_PATH", "GZ_SIM_RESOURCE_PATH"]
+    env_list = [
+        "GAZEBO_MODEL_PATH",
+        "ROS_PACKAGE_PATH",
+        "AMENT_PREFIX_PATH",
+        "SDF_PATH",
+        "IGN_GAZEBO_RESOURCE_PATH",
+        "GZ_SIM_RESOURCE_PATH",
+    ]
 
     # If the URI has no scheme, use by default the file://
     if "://" not in uri:
@@ -37,6 +47,8 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
     # Get scheme from URI
     from urllib.parse import urlparse
+
+    # Parse the URI
     parsed_uri = urlparse(uri)
 
     # We only support the following URI schemes at the moment:
@@ -46,7 +58,9 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * package://: ROS-style package URI
     #
     if parsed_uri.scheme not in {"file", "package", "model"}:
-        raise FileNotFoundError(f"Passed URI \"{uri}\" use non-supported scheme {parsed_uri.scheme}")
+        raise FileNotFoundError(
+            f'Passed URI "{uri}" use non-supported scheme {parsed_uri.scheme}'
+        )
 
     if parsed_uri.scheme == "file":
         # Strip the URI scheme, keep the absolute path to the file (with trailing /)
@@ -89,7 +103,9 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Utility resolve a robotics URI (file://, model://, package://) to an absolute filename.")
+    parser = argparse.ArgumentParser(
+        description="Utility resolve a robotics URI (file://, model://, package://) to an absolute filename."
+    )
     parser.add_argument("uri", metavar="uri", type=str, help="URI to resolve")
 
     args = parser.parse_args()
@@ -97,6 +113,7 @@ def main():
 
     print(result)
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

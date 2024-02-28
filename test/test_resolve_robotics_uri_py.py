@@ -50,8 +50,10 @@ def test_scoped_uri(scheme: str, env_var_name="GZ_SIM_RESOURCE_PATH"):
 
     # URI path in top-level search dir
     with tempfile.TemporaryDirectory() as temp_dir:
-        pathlib.Path(temp_dir).mkdir(exist_ok=True)
-        top_level = pathlib.Path(temp_dir) / "top_level.txt"
+
+        temp_dir_path = pathlib.Path(temp_dir).resolve()
+        temp_dir_path.mkdir(exist_ok=True)
+        top_level = temp_dir_path / "top_level.txt"
         top_level.touch(exist_ok=True)
 
         # Existing relative URI path not in search dirs
@@ -61,24 +63,34 @@ def test_scoped_uri(scheme: str, env_var_name="GZ_SIM_RESOURCE_PATH"):
 
         # Existing absolute URI path in search dirs
         with pytest.raises(FileNotFoundError):
-            with export_env_var(name=env_var_name, value=temp_dir):
+            with export_env_var(name=env_var_name, value=str(temp_dir_path)):
                 uri = f"{scheme}/top_level.txt"
                 resolve_robotics_uri_py.resolve_robotics_uri(uri)
 
         # Existing relative URI path in search dirs
-        with export_env_var(name=env_var_name, value=temp_dir):
-            uri = f"{scheme}top_level.txt"
-            resolve_robotics_uri_py.resolve_robotics_uri(uri)
+        with export_env_var(name=env_var_name, value=str(temp_dir_path)):
+            relative_path = "top_level.txt"
+            uri = f"{scheme}{relative_path}"
+            path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri)
+            assert path_of_file == path_of_file.resolve()
+            assert path_of_file == temp_dir_path / relative_path
 
         # Existing relative URI path in search dirs with multiple paths
-        with export_env_var(name=env_var_name, value=f"/another/dir:{temp_dir}"):
-            uri = f"{scheme}top_level.txt"
-            resolve_robotics_uri_py.resolve_robotics_uri(uri)
+        with export_env_var(
+            name=env_var_name, value=f"/another/dir{os.pathsep}{str(temp_dir_path)}"
+        ):
+            relative_path = "top_level.txt"
+            uri = f"{scheme}{relative_path}"
+            path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri)
+            assert path_of_file == path_of_file.resolve()
+            assert path_of_file == temp_dir_path / relative_path
 
     # URI path in sub-level search dir
     with tempfile.TemporaryDirectory() as temp_dir:
-        (pathlib.Path(temp_dir) / "sub").mkdir(exist_ok=True)
-        level1 = pathlib.Path(temp_dir) / "sub" / "level1.txt"
+
+        temp_dir_path = pathlib.Path(temp_dir).resolve()
+        level1 = temp_dir_path / "sub" / "level1.txt"
+        level1.parent.mkdir(exist_ok=True, parents=True)
         level1.touch(exist_ok=True)
 
         # Existing relative URI path not in search dirs
@@ -88,19 +100,25 @@ def test_scoped_uri(scheme: str, env_var_name="GZ_SIM_RESOURCE_PATH"):
 
         # Existing absolute URI path in search dirs
         with pytest.raises(FileNotFoundError):
-            with export_env_var(name=env_var_name, value=temp_dir):
+            with export_env_var(name=env_var_name, value=str(temp_dir_path)):
                 uri = f"{scheme}/sub/level1.txt"
                 resolve_robotics_uri_py.resolve_robotics_uri(uri)
 
         # Existing relative URI path in search dirs
-        with export_env_var(name=env_var_name, value=temp_dir):
-            uri = f"{scheme}sub/level1.txt"
-            resolve_robotics_uri_py.resolve_robotics_uri(uri)
+        with export_env_var(name=env_var_name, value=str(temp_dir_path)):
+            relative_path = "sub/level1.txt"
+            uri = f"{scheme}{relative_path}"
+            path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri)
+            assert path_of_file == temp_dir_path / relative_path
 
         # Existing relative URI path in search dirs with multiple paths
-        with export_env_var(name=env_var_name, value=f"/another/dir:{temp_dir}"):
-            uri = f"{scheme}sub/level1.txt"
-            resolve_robotics_uri_py.resolve_robotics_uri(uri)
+        with export_env_var(
+            name=env_var_name, value=f"/another/dir{os.pathsep}{str(temp_dir_path)}"
+        ):
+            relative_path = "sub/level1.txt"
+            uri = f"{scheme}{relative_path}"
+            path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri)
+            assert path_of_file == temp_dir_path / relative_path
 
 
 def test_scheme_file():
@@ -119,18 +137,24 @@ def test_scheme_file():
 
     # Existing absolute URI path
     with tempfile.NamedTemporaryFile() as temp:
+        temp_name = pathlib.Path(temp.name).resolve(strict=True)
         uri_file = f"file://{temp.name}"
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
-        assert path_of_file == pathlib.Path(temp.name)
+        assert path_of_file == path_of_file.resolve()
+        assert path_of_file == temp_name
 
     # Existing relative URI path (automatic conversion to absolute)
     with tempfile.NamedTemporaryFile() as temp:
+        temp_name = pathlib.Path(temp.name).resolve(strict=True)
         uri_file = f"file:/{temp.name}"
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
-        assert path_of_file == pathlib.Path(temp.name)
+        assert path_of_file == path_of_file.resolve()
+        assert path_of_file == temp_name
 
     # Fallback to file:// with no scheme
     with tempfile.NamedTemporaryFile() as temp:
-        uri_file = f"{temp.name}"
+        temp_name = pathlib.Path(temp.name).resolve(strict=True)
+        uri_file = f"{temp_name}"
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
-        assert path_of_file == pathlib.Path(temp.name)
+        assert path_of_file == path_of_file.resolve()
+        assert path_of_file == temp_name

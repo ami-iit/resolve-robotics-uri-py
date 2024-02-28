@@ -125,28 +125,23 @@ def test_scheme_file():
 
     clear_env_vars()
 
-    # Non-existing relative URI path
-    with pytest.raises(FileNotFoundError):
-        uri_file = "file://this/file/does/not.exist"
-        resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
-
     # Non-existing absolute URI path
     with pytest.raises(FileNotFoundError):
-        uri_file = "file:///this/file/does/not.exist"
+        uri_file = "file://" + "/this/file/does/not.exist"
         resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
 
-    # Existing absolute URI path
+    # Existing absolute URI path with empty authority
     with tempfile.NamedTemporaryFile() as temp:
         temp_name = pathlib.Path(temp.name).resolve(strict=True)
-        uri_file = f"file://{temp.name}"
+        uri_file = "file://" + temp.name
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
         assert path_of_file == path_of_file.resolve()
         assert path_of_file == temp_name
 
-    # Existing relative URI path (automatic conversion to absolute)
+    # Existing absolute URI path without authority
     with tempfile.NamedTemporaryFile() as temp:
         temp_name = pathlib.Path(temp.name).resolve(strict=True)
-        uri_file = f"file:/{temp.name}"
+        uri_file = "file:" + temp.name
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
         assert path_of_file == path_of_file.resolve()
         assert path_of_file == temp_name

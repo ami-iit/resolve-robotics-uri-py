@@ -113,19 +113,20 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # Strip the URI scheme
     uri_path = uri.replace(f"{parsed_uri.scheme}://", "")
 
+    # Process file:// separately from the other schemes
     if parsed_uri.scheme == "file":
         # Ensure the URI path is absolute
         uri_path = uri_path if uri_path.startswith("/") else f"/{uri_path}"
 
-        # Create the file path
-        uri_file_path = pathlib.Path(uri_path)
+        # Create the file path, resolving symlinks and '..'
+        uri_file_path = pathlib.Path(uri_path).resolve()
 
         # Check that the file exists
         if not uri_file_path.is_file():
             msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
             raise FileNotFoundError(msg.format(uri))
 
-        return uri_file_path
+        return uri_file_path.resolve()
 
     # List of matching resources found
     model_filenames = []
@@ -134,6 +135,9 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
         # Join the folder from environment variable and the URI path
         candidate_file_name = folder / uri_path
+
+        # Expand or resolve the file path (symlinks and ..)
+        candidate_file_name = candidate_file_name.resolve()
 
         if not candidate_file_name.is_file():
             continue
@@ -153,7 +157,7 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
     if len(model_filenames) >= 1:
         assert model_filenames[0].exists()
-        return pathlib.Path(model_filenames[0])
+        return pathlib.Path(model_filenames[0]).resolve()
 
 
 def main():

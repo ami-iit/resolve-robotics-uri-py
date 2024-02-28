@@ -3,6 +3,11 @@ import os
 import pathlib
 import sys
 import warnings
+from typing import Iterable
+
+# =====================
+# URI resolving helpers
+# =====================
 
 # Supported URI schemes
 SupportedSchemes = {"file", "package", "model"}
@@ -35,17 +40,40 @@ SupportedEnvVars = {
 
 
 # Function inspired from https://github.com/ami-iit/robot-log-visualizer/pull/51
-def get_search_paths_from_envs(env_list):
-    return [
+def get_search_paths_from_envs(env_list: Iterable[str]) -> list[pathlib.Path]:
+    # Read the searched paths from all the environment variables
+    search_paths = [
         pathlib.Path(f) if (env != "AMENT_PREFIX_PATH") else pathlib.Path(f) / "share"
         for env in env_list
         if os.getenv(env) is not None
         for f in os.getenv(env).split(os.pathsep)
     ]
 
+    # Resolve and remove duplicate paths
+    search_paths = list({path.resolve() for path in search_paths})
+
+    # Keep only existing paths
+    existing_search_paths = [path for path in search_paths if path.is_dir()]
+
+    # Notify the user of non-existing paths
+    if len(set(search_paths) - set(existing_search_paths)) > 0:
+        msg = "resolve-robotics-uri-py: Ignoring non-existing paths from env vars: {}."
+        warnings.warn(
+            msg.format(
+                pathlist_list_to_string(set(search_paths) - set(existing_search_paths))
+            )
+        )
+
+    return existing_search_paths
+
 
 def pathlist_list_to_string(path_list):
     return " ".join(str(path) for path in path_list)
+
+
+# ===================
+# URI resolving logic
+# ===================
 
 
 def resolve_robotics_uri(uri: str) -> pathlib.Path:

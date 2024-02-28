@@ -1,6 +1,7 @@
 import contextlib
 import os
 import pathlib
+import sys
 import tempfile
 from typing import ContextManager
 
@@ -153,3 +154,9 @@ def test_scheme_file():
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
         assert path_of_file == path_of_file.resolve()
         assert path_of_file == temp_name
+
+    # Try to find an existing file (the Python executable) without any file:/ scheme
+    path_of_python_executable = resolve_robotics_uri_py.resolve_robotics_uri(sys.executable)
+    assert path_of_python_executable == pathlib.Path(sys.executable)
+
+

@@ -40,7 +40,7 @@ jobs:
     
     - name: Run the Python tests
       shell: bash -l {0}
-      run: pytest
+      run: pytest --capture=no
 
     # This test requires the conda-forge::icub-models,
     # robotology::ergocub-software and

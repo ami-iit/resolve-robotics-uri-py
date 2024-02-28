@@ -90,9 +90,10 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
         FileNotFoundError: If no file corresponding to the URI is found.
     """
 
-    # If the URI has no scheme, use by default the file://
-    if "://" not in uri:
-        uri = f"file://{uri}"
+    # If the URI has no scheme, use by default file:// which maps the resolved input
+    # path to a URI with empty authority
+    if not any(uri.startswith(scheme) for scheme in SupportedSchemes):
+        uri = f"file://{pathlib.Path(uri).resolve()}"
 
     # Get scheme from URI
     from urllib.parse import urlparse
@@ -102,22 +103,22 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
     # We only support the following URI schemes at the moment:
     #
-    # * file://:    to pass an absolute file path directly
-    # * model://:   SDF-style model URI
-    # * package://: ROS-style package URI
+    # * file:/      to pass an absolute file path directly
+    # * model://    SDF-style model URI
+    # * package://  ROS-style package URI
+    #
+    # Note that file has only one trailing '/' as per RFC8089:
+    # https://datatracker.ietf.org/doc/html/rfc8089
     #
     if parsed_uri.scheme not in SupportedSchemes:
         msg = "resolve-robotics-uri-py: Passed URI '{}' use non-supported scheme '{}'"
         raise FileNotFoundError(msg.format(uri, parsed_uri.scheme))
 
-    # Strip the URI scheme
-    uri_path = uri.replace(f"{parsed_uri.scheme}://", "")
+    # Strip the scheme from the URI
+    uri_path = uri.replace(f"{parsed_uri.scheme}//", "")
 
-    # Process file:// separately from the other schemes
+    # Process file:/ separately from the other schemes
     if parsed_uri.scheme == "file":
-        # Ensure the URI path is absolute
-        uri_path = uri_path if uri_path.startswith("/") else f"/{uri_path}"
-
         # Create the file path, resolving symlinks and '..'
         uri_file_path = pathlib.Path(uri_path).resolve()
 

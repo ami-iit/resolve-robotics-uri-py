@@ -95,6 +95,32 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     if not any(uri.startswith(scheme) for scheme in SupportedSchemes):
         uri = f"file://{pathlib.Path(uri).resolve()}"
 
+    # ================================================
+    # Process file:/ separately from the other schemes
+    # ================================================
+
+    # This is the file URI scheme as per RFC8089:
+    # https://datatracker.ietf.org/doc/html/rfc8089
+
+    if uri.startswith("file:"):
+        # Strip the scheme from the URI
+        uri = uri.replace(f"file://", "")
+        uri = uri.replace(f"file:", "")
+
+        # Create the file path, resolving symlinks and '..'
+        uri_file_path = pathlib.Path(uri).resolve()
+
+        # Check that the file exists
+        if not uri_file_path.is_file():
+            msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
+            raise FileNotFoundError(msg.format(uri))
+
+        return uri_file_path.resolve()
+
+    # =========================
+    # Process the other schemes
+    # =========================
+
     # Get scheme from URI
     from urllib.parse import urlparse
 
@@ -107,31 +133,18 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     # * model://    SDF-style model URI
     # * package://  ROS-style package URI
     #
-    # Note that file has only one trailing '/' as per RFC8089:
-    # https://datatracker.ietf.org/doc/html/rfc8089
-    #
     if parsed_uri.scheme not in SupportedSchemes:
         msg = "resolve-robotics-uri-py: Passed URI '{}' use non-supported scheme '{}'"
         raise FileNotFoundError(msg.format(uri, parsed_uri.scheme))
 
     # Strip the scheme from the URI
-    uri_path = uri.replace(f"{parsed_uri.scheme}//", "")
-
-    # Process file:/ separately from the other schemes
-    if parsed_uri.scheme == "file":
-        # Create the file path, resolving symlinks and '..'
-        uri_file_path = pathlib.Path(uri_path).resolve()
-
-        # Check that the file exists
-        if not uri_file_path.is_file():
-            msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
-            raise FileNotFoundError(msg.format(uri))
-
-        return uri_file_path.resolve()
+    uri_path = uri
+    uri_path = uri_path.replace(f"{parsed_uri.scheme}://", "")
 
     # List of matching resources found
     model_filenames = []
 
+    # Search the resource in the path from the env variables
     for folder in set(get_search_paths_from_envs(SupportedEnvVars)):
 
         # Join the folder from environment variable and the URI path
@@ -148,7 +161,7 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
             model_filenames.append(candidate_file_name)
 
     if len(model_filenames) == 0:
-        msg = "resolve-robotics-uri-py: No file corresponding to uri '{}' found"
+        msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
         raise FileNotFoundError(msg.format(uri))
 
     if len(model_filenames) > 1:

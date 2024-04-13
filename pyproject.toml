@@ -1,3 +1,25 @@
+[project]
+name = "resolve-robotics-uri-py"
+authors = [
+  { name="Silvio Traversaro", email="silvio.traversaro@iit.it" },
+  { name="Diego Ferigo", email="diego.ferigo@iit.it" }
+]
+description = "Pure python package to solve ROS-style package:// and Gazebo-style model:// URIs in absolute paths."
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: BSD License",
+    "Programming Language :: Python :: 3
+    "Operating System :: OS Independent"
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.dev/ami-iit/resolve-robotics-uri-py"
+Issues = "https://github.dev/ami-iit/resolve-robotics-uri-py/issues"
+
 [build-system]
 build-backend = "setuptools.build_meta"
 requires = [

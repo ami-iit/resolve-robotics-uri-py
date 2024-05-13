@@ -76,12 +76,13 @@ def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
 # ===================
 
 
-def resolve_robotics_uri(uri: str) -> pathlib.Path:
+def resolve_robotics_uri(uri: str, extra_path: str | None = None) -> pathlib.Path:
     """
     Resolve a robotics URI to an absolute filename.
 
     Args:
         uri: The URI to resolve.
+        extra_path: Additional environment variable to look for the file.
 
     Returns:
         The absolute filename corresponding to the URI.
@@ -89,6 +90,8 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     Raises:
         FileNotFoundError: If no file corresponding to the URI is found.
     """
+
+    extra_path = extra_path or ""
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority
@@ -145,10 +148,10 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     model_filenames = []
 
     # Search the resource in the path from the env variables
-    for folder in set(get_search_paths_from_envs(SupportedEnvVars)):
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars | {extra_path})):
 
         # Join the folder from environment variable and the URI path
-        candidate_file_name = folder / uri_path
+        candidate_file_name = pathlib.Path(folder) / uri_path
 
         # Expand or resolve the file path (symlinks and ..)
         candidate_file_name = candidate_file_name.resolve()
@@ -181,11 +184,18 @@ def main():
         )
     )
     parser.add_argument("uri", metavar="URI", type=str, help="URI to resolve")
+    parser.add_argument(
+        "--extra_path",
+        metavar="PATH",
+        type=str,
+        help="Additional environment variable to look for the file",
+        default=None,
+    )
 
     args = parser.parse_args()
 
     try:
-        result = resolve_robotics_uri(args.uri)
+        result = resolve_robotics_uri(args.uri, args.extra_path)
     except FileNotFoundError as e:
         print(e, file=sys.stderr)
         sys.exit(1)

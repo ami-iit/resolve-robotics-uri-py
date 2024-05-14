@@ -84,13 +84,21 @@ def resolve_robotics_uri(
 
     Args:
         uri: The URI to resolve.
-        extra_path: Additional environment variable to look for the file.
+        package_dirs: A list of additional paths to look for the file.
 
     Returns:
         The absolute filename corresponding to the URI.
 
     Raises:
         FileNotFoundError: If no file corresponding to the URI is found.
+
+    Note:
+        In case `package_dirs` is not provided, the function will look for the file in the
+        default search paths specified by the environment variables in `SupportedEnvVars`.
+
+        If a given model searches for the meshes in `package://ModelName/meshes/mesh.stl`, and the
+        actual mesh is in `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should
+        contain `/usr/local/share`.
     """
     package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
 

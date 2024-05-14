@@ -76,7 +76,9 @@ def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
 # ===================
 
 
-def resolve_robotics_uri(uri: str, extra_path: str | None = None) -> pathlib.Path:
+def resolve_robotics_uri(
+    uri: str, package_dirs: list[str] | None = None
+) -> pathlib.Path:
     """
     Resolve a robotics URI to an absolute filename.
 
@@ -90,8 +92,7 @@ def resolve_robotics_uri(uri: str, extra_path: str | None = None) -> pathlib.Pat
     Raises:
         FileNotFoundError: If no file corresponding to the URI is found.
     """
-
-    extra_path = extra_path or ""
+    package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority
@@ -148,10 +149,14 @@ def resolve_robotics_uri(uri: str, extra_path: str | None = None) -> pathlib.Pat
     model_filenames = []
 
     # Search the resource in the path from the env variables
-    for folder in set(get_search_paths_from_envs(SupportedEnvVars | {extra_path})):
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
+        path
+        for directory in package_dirs
+        if directory and (path := pathlib.Path(directory)).exists()
+    }:
 
         # Join the folder from environment variable and the URI path
-        candidate_file_name = pathlib.Path(folder) / uri_path
+        candidate_file_name = folder / uri_path
 
         # Expand or resolve the file path (symlinks and ..)
         candidate_file_name = candidate_file_name.resolve()
@@ -185,17 +190,17 @@ def main():
     )
     parser.add_argument("uri", metavar="URI", type=str, help="URI to resolve")
     parser.add_argument(
-        "--extra_path",
+        "--package_dirs",
         metavar="PATH",
         type=str,
-        help="Additional environment variable to look for the file",
+        help="Additional paths to look for the file",
         default=None,
     )
 
     args = parser.parse_args()
 
     try:
-        result = resolve_robotics_uri(args.uri, args.extra_path)
+        result = resolve_robotics_uri(args.uri, args.package_dirs)
     except FileNotFoundError as e:
         print(e, file=sys.stderr)
         sys.exit(1)

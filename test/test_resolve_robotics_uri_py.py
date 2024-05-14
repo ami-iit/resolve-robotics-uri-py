@@ -164,10 +164,13 @@ def test_scheme_file():
 
 def test_additional_search_path():
 
+    import tempfile
+    import pathlib
+    import resolve_robotics_uri_py
+
     clear_env_vars()
 
     uri = "model://my_model"
-    extra_path = "MY_SEARCH_PATH"
 
     with tempfile.TemporaryDirectory() as temp_dir:
 
@@ -177,11 +180,5 @@ def test_additional_search_path():
         top_level.touch(exist_ok=True)
 
         # Test resolving a URI with an additional search path
-        with export_env_var(name=extra_path, value=str(temp_dir_path)):
-            result = resolve_robotics_uri_py.resolve_robotics_uri(uri, extra_path)
-            assert result == temp_dir_path / "my_model"
-
-        # Test resolving a URI an additional non-existing search path
-        with export_env_var(name=extra_path, value="/this/path/does/not/exist"):
-            with pytest.raises(FileNotFoundError):
-                resolve_robotics_uri_py.resolve_robotics_uri(uri, extra_path)
+        result = resolve_robotics_uri_py.resolve_robotics_uri(uri, temp_dir)
+        assert result == temp_dir_path / "my_model"

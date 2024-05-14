@@ -107,8 +107,8 @@ def resolve_robotics_uri(uri: str, extra_path: str | None = None) -> pathlib.Pat
 
     if uri.startswith("file:"):
         # Strip the scheme from the URI
-        uri = uri.replace(f"file://", "")
-        uri = uri.replace(f"file:", "")
+        uri = uri.replace("file://", "")
+        uri = uri.replace("file:", "")
 
         # Create the file path, resolving symlinks and '..'
         uri_file_path = pathlib.Path(uri).resolve()

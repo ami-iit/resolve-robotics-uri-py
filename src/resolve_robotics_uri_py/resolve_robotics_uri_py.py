@@ -93,12 +93,13 @@ def resolve_robotics_uri(
         FileNotFoundError: If no file corresponding to the URI is found.
 
     Note:
-        In case `package_dirs` is not provided, the function will look for the file in the
+        By default the function will look for the file in the
         default search paths specified by the environment variables in `SupportedEnvVars`.
-
-        If a given model searches for the meshes in `package://ModelName/meshes/mesh.stl`, and the
-        actual mesh is in `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should
-        contain `/usr/local/share`.
+ 
+        If the `package_dirs` argument is provided, the model is also searched in the folders
+        specified in `package_dirs` . In particular if a file is specified by the uri
+        `package://ModelName/meshes/mesh.stl`, and the actual file is in 
+        `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should contain `/usr/local/share`.
     """
     package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
 

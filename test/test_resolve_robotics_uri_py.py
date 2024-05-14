@@ -156,7 +156,32 @@ def test_scheme_file():
         assert path_of_file == temp_name
 
     # Try to find an existing file (the Python executable) without any file:/ scheme
-    path_of_python_executable = resolve_robotics_uri_py.resolve_robotics_uri(sys.executable)
+    path_of_python_executable = resolve_robotics_uri_py.resolve_robotics_uri(
+        sys.executable
+    )
     assert path_of_python_executable == pathlib.Path(sys.executable)
 
 
+def test_additional_search_path():
+
+    clear_env_vars()
+
+    uri = "model://my_model"
+    extra_path = "MY_SEARCH_PATH"
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+
+        temp_dir_path = pathlib.Path(temp_dir).resolve()
+        temp_dir_path.mkdir(exist_ok=True)
+        top_level = temp_dir_path / "my_model"
+        top_level.touch(exist_ok=True)
+
+        # Test resolving a URI with an additional search path
+        with export_env_var(name=extra_path, value=str(temp_dir_path)):
+            result = resolve_robotics_uri_py.resolve_robotics_uri(uri, extra_path)
+            assert result == temp_dir_path / "my_model"
+
+        # Test resolving a URI an additional non-existing search path
+        with export_env_var(name=extra_path, value="/this/path/does/not/exist"):
+            with pytest.raises(FileNotFoundError):
+                resolve_robotics_uri_py.resolve_robotics_uri(uri, extra_path)

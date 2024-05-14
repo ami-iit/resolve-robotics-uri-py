@@ -76,19 +76,32 @@ def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
 # ===================
 
 
-def resolve_robotics_uri(uri: str) -> pathlib.Path:
+def resolve_robotics_uri(
+    uri: str, package_dirs: list[str] | None = None
+) -> pathlib.Path:
     """
     Resolve a robotics URI to an absolute filename.
 
     Args:
         uri: The URI to resolve.
+        package_dirs: A list of additional paths to look for the file.
 
     Returns:
         The absolute filename corresponding to the URI.
 
     Raises:
         FileNotFoundError: If no file corresponding to the URI is found.
+
+    Note:
+        By default the function will look for the file in the
+        default search paths specified by the environment variables in `SupportedEnvVars`.
+ 
+        If the `package_dirs` argument is provided, the model is also searched in the folders
+        specified in `package_dirs` . In particular if a file is specified by the uri
+        `package://ModelName/meshes/mesh.stl`, and the actual file is in 
+        `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should contain `/usr/local/share`.
     """
+    package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority
@@ -104,8 +117,8 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
 
     if uri.startswith("file:"):
         # Strip the scheme from the URI
-        uri = uri.replace(f"file://", "")
-        uri = uri.replace(f"file:", "")
+        uri = uri.replace("file://", "")
+        uri = uri.replace("file:", "")
 
         # Create the file path, resolving symlinks and '..'
         uri_file_path = pathlib.Path(uri).resolve()
@@ -145,7 +158,11 @@ def resolve_robotics_uri(uri: str) -> pathlib.Path:
     model_filenames = []
 
     # Search the resource in the path from the env variables
-    for folder in set(get_search_paths_from_envs(SupportedEnvVars)):
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
+        path
+        for directory in package_dirs
+        if directory and (path := pathlib.Path(directory)).exists()
+    }:
 
         # Join the folder from environment variable and the URI path
         candidate_file_name = folder / uri_path
@@ -181,11 +198,18 @@ def main():
         )
     )
     parser.add_argument("uri", metavar="URI", type=str, help="URI to resolve")
+    parser.add_argument(
+        "--package_dirs",
+        metavar="PATH",
+        type=str,
+        help="Additional paths to look for the file",
+        default=None,
+    )
 
     args = parser.parse_args()
 
     try:
-        result = resolve_robotics_uri(args.uri)
+        result = resolve_robotics_uri(args.uri, args.package_dirs)
     except FileNotFoundError as e:
         print(e, file=sys.stderr)
         sys.exit(1)

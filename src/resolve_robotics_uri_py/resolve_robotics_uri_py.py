@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 import warnings
-from typing import Iterable
+from typing import Union, Iterable
 
 # =====================
 # URI resolving helpers

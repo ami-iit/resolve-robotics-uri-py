@@ -4,7 +4,8 @@ channels:
   - robotology
   - robostack-staging
 dependencies:
-  - python
+  # Use the minimum version supported in conda-forge here
+  - python==3.9
   - pip
   - pytest
   # packages that ship URDFs used to test

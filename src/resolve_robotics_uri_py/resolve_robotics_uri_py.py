@@ -77,7 +77,7 @@ def pathlist_list_to_string(path_list: Iterable[Union[str, pathlib.Path]]) -> st
 
 
 def resolve_robotics_uri(
-    uri: str, package_dirs: list[str] | None = None
+    uri: str, package_dirs: Union[list[str], None] = None
 ) -> pathlib.Path:
     """
     Resolve a robotics URI to an absolute filename.
@@ -158,7 +158,7 @@ def resolve_robotics_uri(
     model_filenames = []
 
     # Search the resource in the path from the env variables
-    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) {
         path
         for directory in package_dirs
         if directory and (path := pathlib.Path(directory)).exists()

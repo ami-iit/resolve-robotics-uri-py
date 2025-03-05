@@ -3,7 +3,7 @@ import os
 import pathlib
 import sys
 import warnings
-from typing import Iterable
+from typing import Union, Iterable
 
 # =====================
 # URI resolving helpers
@@ -67,7 +67,7 @@ def get_search_paths_from_envs(env_list: Iterable[str]) -> list[pathlib.Path]:
     return existing_search_paths
 
 
-def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
+def pathlist_list_to_string(path_list: Iterable[Union[str, pathlib.Path]]) -> str:
     return " ".join(str(path) for path in path_list)
 
 
@@ -77,7 +77,7 @@ def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
 
 
 def resolve_robotics_uri(
-    uri: str, package_dirs: list[str] | None = None
+    uri: str, package_dirs: Union[list[str], None] = None
 ) -> pathlib.Path:
     """
     Resolve a robotics URI to an absolute filename.

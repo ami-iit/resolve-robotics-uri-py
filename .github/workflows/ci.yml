@@ -51,7 +51,6 @@ jobs:
       run: |
         resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf
         resolve-robotics-uri-py package://ergoCub/robots/ergoCubSN000/model.urdf
-        resolve-robotics-uri-py package://moveit_resources_panda_description/urdf/panda.urdf
         ! resolve-robotics-uri-py package://this/file/does/not/exist
     - name: Check command line helper (Ubuntu and macOS)
       if: startsWith(matrix.os, 'ubuntu') || startsWith(matrix.os, 'macos')

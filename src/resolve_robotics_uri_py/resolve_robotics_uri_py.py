@@ -67,7 +67,7 @@ def get_search_paths_from_envs(env_list: Iterable[str]) -> list[pathlib.Path]:
     return existing_search_paths
 
 
-def pathlist_list_to_string(path_list: Iterable[str | pathlib.Path]) -> str:
+def pathlist_list_to_string(path_list: Iterable[Union[str, pathlib.Path]]) -> str:
     return " ".join(str(path) for path in path_list)
 
 

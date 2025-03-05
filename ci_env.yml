@@ -10,4 +10,4 @@ dependencies:
   - pytest
   # packages that ship URDFs used to test
   - icub-models
-  - ergocub-software
+  - ergocub-models

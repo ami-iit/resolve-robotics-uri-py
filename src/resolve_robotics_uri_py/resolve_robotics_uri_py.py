@@ -158,7 +158,7 @@ def resolve_robotics_uri(
     model_filenames = []
 
     # Search the resource in the path from the env variables
-    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) {
+    for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
         path
         for directory in package_dirs
         if directory and (path := pathlib.Path(directory)).exists()

@@ -45,13 +45,39 @@ absolute_path = resolve_robotics_uri_py.resolve_robotics_uri("package://moveit_r
 
 `resolve_robotics_uri_py` also install a command line tool called `resolve-robotics-uri-py` for use in scripts, that can be used as:
 
-~~~
+~~~bash
 resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf
 ~~~
 
 For example,  on bash this can be used to easily convert the a urdf specified via `package://` to an sdf (assuming you have Gazebo installed), using the [backtick operator](https://www.redhat.com/sysadmin/backtick-operator-vs-parens):
-~~~
+~~~bash
 gz sdf -p `resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.urdf`
+~~~
+
+### Adding Custom Search Paths
+
+Some packages may not be installed in the standard locations, or you may want to use a custom directory structure. In such cases, you can specify additional search paths for the `resolve-robotics-uri-py` command in two ways:
+
+1. Using the `--package_dirs` command line option:
+    ~~~bash
+    resolve-robotics-uri-py --package_dirs /path/to/packages:/another/path package://my_package/model.urdf
+    ~~~
+
+2. Setting the `RRU_ADDITIONAL_PATHS` environment variable:
+    ~~~bash
+    export RRU_ADDITIONAL_PATHS=/path/to/packages:/another/path
+    resolve-robotics-uri-py package://my_package/model.urdf
+    ~~~
+
+Both methods accept a colon-separated list of directories (or semicolon-separated on Windows).
+
+In Python code, you can specify additional paths using the `additional_package_dirs` parameter:
+
+~~~python
+absolute_path = resolve_robotics_uri_py.resolve_robotics_uri(
+     "package://my_package/model.urdf",
+     package_dirs=["/path/to/packages", "/another/path"]
+)
 ~~~
 
 ## Contributing

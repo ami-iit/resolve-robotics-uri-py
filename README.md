@@ -9,7 +9,7 @@ Install using onle one of the following commands to install in an existing envir
 ### Installation from conda-forge
 
 ```bash
-mamba install -c conda-forge resolve-robotics-uri-py
+conda install -c conda-forge resolve-robotics-uri-py
 ```
 
 ### Installation from PyPI

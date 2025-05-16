@@ -95,13 +95,21 @@ def resolve_robotics_uri(
     Note:
         By default the function will look for the file in the
         default search paths specified by the environment variables in `SupportedEnvVars`.
- 
+
         If the `package_dirs` argument is provided, the model is also searched in the folders
         specified in `package_dirs` . In particular if a file is specified by the uri
-        `package://ModelName/meshes/mesh.stl`, and the actual file is in 
+        `package://ModelName/meshes/mesh.stl`, and the actual file is in
         `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should contain `/usr/local/share`.
     """
     package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
+
+    # Add additional search paths from the RRU_ADDITIONAL_PATHS environment variable
+    package_dirs.append(os.getenv("RRU_ADDITIONAL_PATHS"))
+
+    # Remove empty strings and None entries from the list
+    package_dirs = list(
+        {p for entry in package_dirs for p in entry.split(os.pathsep) if p}
+    )
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority

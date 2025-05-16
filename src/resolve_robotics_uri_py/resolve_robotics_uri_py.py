@@ -108,7 +108,7 @@ def resolve_robotics_uri(
 
     # Remove empty strings and None entries from the list
     package_dirs = list(
-        {p for entry in package_dirs for p in entry.split(os.pathsep) if p}
+        {p for entry in package_dirs if entry for p in entry.split(os.pathsep) if p}
     )
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
@@ -169,7 +169,7 @@ def resolve_robotics_uri(
     for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
         path
         for directory in package_dirs
-        if directory and (path := pathlib.Path(directory)).exists()
+        if directory and (path := pathlib.Path(directory).expanduser()).exists()
     }:
 
         # Join the folder from environment variable and the URI path

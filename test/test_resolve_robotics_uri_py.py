@@ -182,3 +182,17 @@ def test_additional_search_path():
         # Test resolving a URI with an additional search path
         result = resolve_robotics_uri_py.resolve_robotics_uri(uri, temp_dir)
         assert result == temp_dir_path / "my_model"
+
+        # Test resolving a URI with multiple additional search paths
+        result = resolve_robotics_uri_py.resolve_robotics_uri(
+            uri, ["/another/dir", temp_dir]
+        )
+
+        assert result == temp_dir_path / "my_model"
+
+        # Test resolving a URI with RRU_ADDITIONAL_PATHS environment variable
+        with export_env_var(
+            name="RRU_ADDITIONAL_PATHS", value=f"/another/dir{os.pathsep}{temp_dir}"
+        ):
+            result = resolve_robotics_uri_py.resolve_robotics_uri(uri)
+            assert result == temp_dir_path / "my_model"

@@ -56,18 +56,31 @@ gz sdf -p `resolve-robotics-uri-py package://iCub/robots/iCubGazeboV2_7/model.ur
 
 ### Adding Custom Search Paths
 
-Some packages may not be installed in the standard locations, or you may want to use a custom directory structure. In such cases, you can specify additional search paths for the `resolve-robotics-uri-py` command in two ways:
+Some packages may not be installed in standard locations, or you may want to use a custom directory structure. In such cases, you have a few options:
 
-1. Using the `--package_dirs` command line option:
-    ~~~bash
-    resolve-robotics-uri-py --package_dirs /path/to/packages:/another/path package://my_package/model.urdf
-    ~~~
+#### Option 1: Modify the Native Search Paths
 
-2. Setting the `RRU_ADDITIONAL_PATHS` environment variable:
-    ~~~bash
-    export RRU_ADDITIONAL_PATHS=/path/to/packages:/another/path
-    resolve-robotics-uri-py package://my_package/model.urdf
-    ~~~
+You can add the search path to one of the natively supported paths of Gazebo or ROS, such as:
+
+* `GAZEBO_MODEL_PATH`
+* `ROS_PACKAGE_PATH`
+
+#### Option 2: Specify Additional Search Paths
+
+If you prefer not to modify the default ROS or Gazebo search paths, you can use either the `--package_dirs` command line option or set the `RRU_ADDITIONAL_PATHS` environment variable:
+
+##### Using the `--package_dirs` Command Line Option:
+
+~~~bash
+resolve-robotics-uri-py --package_dirs /path/to/packages:/another/path package://my_package/model.urdf
+~~~
+
+##### Setting the `RRU_ADDITIONAL_PATHS` Environment Variable:
+
+~~~bash
+export RRU_ADDITIONAL_PATHS=/path/to/packages:/another/path
+resolve-robotics-uri-py package://my_package/model.urdf
+~~~
 
 Both methods accept a colon-separated list of directories (or semicolon-separated on Windows).
 

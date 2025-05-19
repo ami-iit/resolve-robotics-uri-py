@@ -36,6 +36,7 @@ SupportedEnvVars = {
     "IGN_GAZEBO_RESOURCE_PATH",
     "ROS_PACKAGE_PATH",
     "SDF_PATH",
+    "RRU_ADDITIONAL_PATHS",
 }
 
 
@@ -102,9 +103,6 @@ def resolve_robotics_uri(
         `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should contain `/usr/local/share`.
     """
     package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
-
-    # Add additional search paths from the RRU_ADDITIONAL_PATHS environment variable
-    package_dirs.append(os.getenv("RRU_ADDITIONAL_PATHS"))
 
     # Remove empty strings and None entries from the list
     package_dirs = list(

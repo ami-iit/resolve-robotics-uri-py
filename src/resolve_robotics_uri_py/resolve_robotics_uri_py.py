@@ -43,10 +43,11 @@ SupportedEnvVars = {
 def get_search_paths_from_envs(env_list: Iterable[str]) -> list[pathlib.Path]:
     # Read the searched paths from all the environment variables
     search_paths = [
-        pathlib.Path(f) if (env != "AMENT_PREFIX_PATH") else pathlib.Path(f) / "share"
+        pathlib.Path(f.strip()) if (env != "AMENT_PREFIX_PATH") else pathlib.Path(f) / "share"
         for env in env_list
         if os.getenv(env) is not None
         for f in os.getenv(env).split(os.pathsep)
+        if f.strip() != ""
     ]
 
     # Resolve and remove duplicate paths
@@ -220,3 +221,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

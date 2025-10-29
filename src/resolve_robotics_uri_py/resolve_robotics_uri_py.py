@@ -36,6 +36,7 @@ SupportedEnvVars = {
     "IGN_GAZEBO_RESOURCE_PATH",
     "ROS_PACKAGE_PATH",
     "SDF_PATH",
+    "RRU_ADDITIONAL_PATHS",
 }
 
 
@@ -96,13 +97,18 @@ def resolve_robotics_uri(
     Note:
         By default the function will look for the file in the
         default search paths specified by the environment variables in `SupportedEnvVars`.
- 
+
         If the `package_dirs` argument is provided, the model is also searched in the folders
         specified in `package_dirs` . In particular if a file is specified by the uri
-        `package://ModelName/meshes/mesh.stl`, and the actual file is in 
+        `package://ModelName/meshes/mesh.stl`, and the actual file is in
         `/usr/local/share/ModelName/meshes/mesh.stl`, the `package_dirs` should contain `/usr/local/share`.
     """
     package_dirs = package_dirs if isinstance(package_dirs, list) else [package_dirs]
+
+    # Remove empty strings and None entries from the list
+    package_dirs = list(
+        {p for entry in package_dirs if entry for p in entry.split(os.pathsep) if p}
+    )
 
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority
@@ -162,7 +168,7 @@ def resolve_robotics_uri(
     for folder in set(get_search_paths_from_envs(SupportedEnvVars)) | {
         path
         for directory in package_dirs
-        if directory and (path := pathlib.Path(directory)).exists()
+        if directory and (path := pathlib.Path(directory).expanduser()).exists()
     }:
 
         # Join the folder from environment variable and the URI path

@@ -62,8 +62,8 @@ Some packages may not be installed in standard locations, or you may want to use
 
 You can add the search path to one of the natively supported paths of Gazebo or ROS, such as:
 
-* `GAZEBO_MODEL_PATH`
-* `ROS_PACKAGE_PATH`
+* `GZ_SIM_RESOURCE_PATH`
+* `AMENT_PREFIX_PATH`
 
 #### Option 2: Specify Additional Search Paths
 

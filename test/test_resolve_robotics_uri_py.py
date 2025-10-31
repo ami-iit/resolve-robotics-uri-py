@@ -134,7 +134,7 @@ def test_scheme_file():
     # Existing absolute URI path with empty authority
     with tempfile.NamedTemporaryFile() as temp:
         temp_name = pathlib.Path(temp.name).resolve(strict=True)
-        uri_file = "file://" + temp.name
+        uri_file = temp_name.as_uri()
         path_of_file = resolve_robotics_uri_py.resolve_robotics_uri(uri_file)
         assert path_of_file == path_of_file.resolve()
         assert path_of_file == temp_name

@@ -4,6 +4,8 @@ import pathlib
 import sys
 import warnings
 from typing import Union, Iterable
+from urllib.parse import urlparse
+from urllib.request import url2pathname
 
 # =====================
 # URI resolving helpers
@@ -113,38 +115,9 @@ def resolve_robotics_uri(
     # If the URI has no scheme, use by default file:// which maps the resolved input
     # path to a URI with empty authority
     if not any(uri.startswith(scheme) for scheme in SupportedSchemes):
-        uri = f"file://{pathlib.Path(uri).resolve()}"
+        uri = pathlib.Path(uri).resolve().as_uri()
 
-    # ================================================
-    # Process file:/ separately from the other schemes
-    # ================================================
-
-    # This is the file URI scheme as per RFC8089:
-    # https://datatracker.ietf.org/doc/html/rfc8089
-
-    if uri.startswith("file:"):
-        # Strip the scheme from the URI
-        uri = uri.replace("file://", "")
-        uri = uri.replace("file:", "")
-
-        # Create the file path, resolving symlinks and '..'
-        uri_file_path = pathlib.Path(uri).resolve()
-
-        # Check that the file exists
-        if not uri_file_path.is_file():
-            msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
-            raise FileNotFoundError(msg.format(uri))
-
-        return uri_file_path.resolve()
-
-    # =========================
-    # Process the other schemes
-    # =========================
-
-    # Get scheme from URI
-    from urllib.parse import urlparse
-
-    # Parse the URI
+    # Parse the URI to determine the scheme and path
     parsed_uri = urlparse(uri)
 
     # We only support the following URI schemes at the moment:
@@ -156,6 +129,24 @@ def resolve_robotics_uri(
     if parsed_uri.scheme not in SupportedSchemes:
         msg = "resolve-robotics-uri-py: Passed URI '{}' use non-supported scheme '{}'"
         raise FileNotFoundError(msg.format(uri, parsed_uri.scheme))
+
+    # This is the file URI scheme as per RFC8089:
+    # https://datatracker.ietf.org/doc/html/rfc8089
+
+    if parsed_uri.scheme == "file":
+        # Convert URI path to local filesystem path using url2pathname
+        # This properly handles Windows paths like /C:/path/to/file -> C:\path\to\file
+        local_path = url2pathname(parsed_uri.path)
+
+        # Create the file path, resolving symlinks and '..'
+        uri_file_path = pathlib.Path(local_path).resolve()
+
+        # Check that the file exists
+        if not uri_file_path.is_file():
+            msg = "resolve-robotics-uri-py: No file corresponding to URI '{}' found"
+            raise FileNotFoundError(msg.format(uri))
+
+        return uri_file_path.resolve()
 
     # Strip the scheme from the URI
     uri_path = uri
@@ -170,7 +161,6 @@ def resolve_robotics_uri(
         for directory in package_dirs
         if directory and (path := pathlib.Path(directory).expanduser()).exists()
     }:
-
         # Join the folder from environment variable and the URI path
         candidate_file_name = folder / uri_path
 
